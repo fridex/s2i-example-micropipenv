@@ -1,0 +1,163 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: s2i-example-micropipenv
+  annotations:
+    openshift.io/display-name: "Thoth S2I Example"
+    openshift.io/documentation-url: "https://github.com/thoth-station/s2i-example-micropipenv"
+    openshift.io/provider-display-name: "Red Hat, Inc."
+    description: |-
+      An example application integrating OpenShift's s2i with Thoth's recommendation engine.
+    version: 0.2.0
+    tags: thoth,openshift,s2i,python
+    iconClass: icon-python
+  labels:
+    template: s2i-example-micropipenv
+    app: "s2i-example-micropipenv"
+
+parameters:
+  - description: "Thoth Environment to use for retrieving advices."
+    displayName: "Environment"
+    name: "THOTH_HOST"
+    required: true
+    value: "khemenu.thoth-station.ninja"
+
+objects:
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      name: "s2i-example-micropipenv"
+      labels:
+        app: "s2i-example-micropipenv"
+    spec:
+      successfulBuildsHistoryLimit: 1
+      failedBuildsHistoryLimit: 2
+      resources:
+        requests:
+          cpu: 1
+          memory: 512Mi
+        limits:
+          cpu: 1
+          memory: 512Mi
+      output:
+        to:
+          kind: ImageStreamTag
+          name: "s2i-example-micropipenv:latest"
+      source:
+        type: Git
+        git:
+          uri: "https://github.com/fridex/s2i-example-micropipenv"
+          ref: "master"
+      strategy:
+        type: Source
+        sourceStrategy:
+          from:
+            kind: ImageStreamTag
+            name: "s2i-thoth-python-36:latest"
+          env:
+            - name: "ENABLE_PIPENV"
+              value: "1"
+            - name: "WEB_CONCURRENCY"
+              value: "4"
+            - name: "THOTH_HOST"
+              value: "${THOTH_HOST}"
+            - name: "THAMOS_CONFIG_EXPAND_ENV"
+              value: "1"
+            - name: "THAMOS_NO_PROGRESSBAR"
+              value: "1"
+            - name: "THOTH_ADVISE"
+              value: "0"
+            - name: "MICROPIPENV_METHOD"
+              value: "poetry"
+      triggers:
+        - type: ImageChange
+          imageChange: {}
+
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      name: "s2i-example-micropipenv"
+      labels:
+        app: "s2i-example-micropipenv"
+    spec:
+      to:
+        kind: Service
+        name: "s2i-example-micropipenv"
+
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      labels:
+        app: "s2i-example-micropipenv"
+        service: s2i-example-micropipenv
+      name: "s2i-example-micropipenv"
+    spec:
+      ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        service: s2i-example-micropipenv
+
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      labels:
+        app: "s2i-example-micropipenv"
+      name: "s2i-example-micropipenv"
+    spec:
+      replicas: 1
+      selector:
+        service: "s2i-example-micropipenv"
+      template:
+        metadata:
+          labels:
+            service: "s2i-example-micropipenv"
+        spec:
+          containers:
+            - name: "s2i-example-micropipenv"
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              resources:
+                requests:
+                  memory: 512Mi
+                  cpu: 250m
+                limits:
+                  memory: 512Mi
+                  cpu: 500m
+      test: false
+      triggers:
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - "s2i-example-micropipenv"
+            from:
+              kind: ImageStreamTag
+              name: "s2i-example-micropipenv:latest"
+
+  - apiVersion: "image.openshift.io/v1"
+    kind: ImageStream
+    metadata:
+      labels:
+        app: "s2i-example-micropipenv"
+      name: "s2i-example-micropipenv"
+    spec:
+      name: "s2i-example-micropipenv"
+
+  - apiVersion: "image.openshift.io/v1"
+    kind: ImageStream
+    metadata:
+      labels:
+        app: "s2i-example-micropipenv"
+      name: "s2i-thoth-python-36"
+    spec:
+      tags:
+        - name: "latest"
+          from:
+            kind: "DockerImage"
+            name: "quay.io/thoth-station/s2i-thoth-ubi8-py36:v0.11.3"
+          referencePolicy:
+            type: "Source"
