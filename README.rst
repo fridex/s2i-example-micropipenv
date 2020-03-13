@@ -171,4 +171,4 @@ To clean up your name space after the demo, you can run the following command:
 
 .. code-block:: console
 
-  $ oc delete -n fpokorny-thoth-dev -l app=s2i-example-micropipenv bc,is,dc,route,svc
+  $ oc delete -l app=s2i-example-micropipenv bc,is,dc,route,svc
