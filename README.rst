@@ -128,6 +128,13 @@ To notify Python s2i user what packages are installed, micropipenv populates
    :alt: Warning produced when Python requirements are not pinned down.
    :align: center
 
+Explictly specifying requirements file
+======================================
+
+You can also provide ``MICROPIPENV_METHOD`` environment variable to the
+OpenShift build process to make sure your desired installation method is used.
+Refer to micropipenv docs for more info. See also ``openshift.yaml`` and
+comments in the build configuration.
 
 micropipenv vs Pipenv size
 ==========================

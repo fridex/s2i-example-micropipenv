@@ -67,8 +67,13 @@ objects:
               value: "1"
             - name: "THOTH_ADVISE"
               value: "0"
-            - name: "MICROPIPENV_METHOD"
-              value: "poetry"
+            #
+            # Optionally you can enforce the installation method by providing
+            # the following environment variable - see --method option for
+            # micropipenv install command.
+            #
+            # - name: "MICROPIPENV_METHOD"
+            #   value: "poetry"
       triggers:
         - type: ImageChange
           imageChange: {}
