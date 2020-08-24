@@ -67,6 +67,8 @@ objects:
               value: "1"
             - name: "THOTH_ADVISE"
               value: "0"
+            - name: "THOTH_PROVENANCE_CHECK"
+              value: "0"
             #
             # Optionally you can enforce the installation method by providing
             # the following environment variable - see --method option for
