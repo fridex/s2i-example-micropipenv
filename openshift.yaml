@@ -30,8 +30,8 @@ objects:
       labels:
         app: "s2i-example-micropipenv"
     spec:
-      successfulBuildsHistoryLimit: 1
-      failedBuildsHistoryLimit: 2
+      successfulBuildsHistoryLimit: 10
+      failedBuildsHistoryLimit: 10
       resources:
         requests:
           cpu: 1
