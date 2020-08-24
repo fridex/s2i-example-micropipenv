@@ -165,6 +165,6 @@ objects:
         - name: "latest"
           from:
             kind: "DockerImage"
-            name: "quay.io/thoth-station/s2i-thoth-ubi8-py36:v0.11.3"
+            name: "quay.io/thoth-station/s2i-thoth-ubi8-py36:v0.15.0"
           referencePolicy:
             type: "Source"
